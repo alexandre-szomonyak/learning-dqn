@@ -1,3 +1,4 @@
+from lib2to3.pgen2.token import NEWLINE
 from typing import Tuple, Optional
 
 import gym
@@ -76,3 +77,5 @@ if __name__ == '__main__':
     except gym.error.Error:
         env = gym.make('FrozenLake-v1')
     # TODO: complete.
+
+    train(env, 0.99, 30000, 1000, 32, 0.01, 1.0, 0.05, 0.99)

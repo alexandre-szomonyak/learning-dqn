@@ -1,5 +1,7 @@
+from re import X
 from typing import Optional
-from numpy import ndarray
+from numpy import ndarray, size, zeros
+import random
 
 
 def create_q_table(num_states: int, num_actions: int) -> ndarray:
@@ -11,8 +13,8 @@ def create_q_table(num_states: int, num_actions: int) -> ndarray:
     :return: q_table: Initial q_table.
     """
     # TODO: complete.
-    raise NotImplementedError
 
+    return zeros(shape=(num_states, num_actions))
 
 class QLearnerAgent:
     """
@@ -43,6 +45,7 @@ class QLearnerAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_max = epsilon_max
         self.epsilon = epsilon_max
+        self.num_actions = num_actions
 
     def greedy_action(self, observation: int) -> int:
         """
@@ -52,7 +55,8 @@ class QLearnerAgent:
         :return: The action.
         """
         # TODO: complete.
-        raise NotImplementedError
+
+        return self.q_table.argmax(axis=1)[observation]
 
     def act(self, observation: int, training: bool = True) -> int:
         """
@@ -64,7 +68,13 @@ class QLearnerAgent:
         :return: The action.
         """
         # TODO: complete.
-        raise NotImplementedError
+
+        if (not training):
+            return self.greedy_action(observation)
+        elif(random.uniform(0,1) < self.epsilon):
+            self.epsilon = self.epsilon*self.epsilon_decay
+            return random.randint(0, self.num_actions-1) ;" chooses a random action "
+        else: return self.greedy_action(observation)
 
     def learn(self, obs: int, act: int, rew: float, done: bool, next_obs: int) -> None:
         """
@@ -77,5 +87,7 @@ class QLearnerAgent:
         :param next_obs: The next observation.
         """
         # TODO: complete.
-        raise NotImplementedError
+
+        self.q_table[obs, act] += self.learning_rate * (rew + self.gamma * self.q_table.argmax(axis=1)[next_obs] - self.q_table[obs, act])
+        done
 
