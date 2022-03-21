@@ -1,6 +1,9 @@
 from lib2to3.pgen2.token import NEWLINE
 from typing import Tuple, Optional
 
+import  matplotlib.pyplot as plt
+import random
+
 import gym
 import numpy as np
 from gym import Env
@@ -56,6 +59,7 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
     agent = QLearnerAgent(env.observation_space.n, env.action_space.n, alpha, gamma, epsilon_max,
                           epsilon_min, epsilon_decay)
     evaluation_returns = np.zeros(num_episodes // evaluate_every)
+    episode_evaluations = np.zeros(num_episodes // evaluate_every)
     returns = np.zeros(num_episodes)
     for episode in range(num_episodes):
         returns[episode] = run_episode(env, agent, True, gamma)
@@ -66,8 +70,10 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
             for eval_episode in range(num_evaluation_episodes):
                 cum_rewards_eval[eval_episode] = run_episode(env, agent, False, gamma)
             evaluation_returns[evaluation_step] = np.mean(cum_rewards_eval)
+            episode_evaluations[evaluation_step] = episode + 1
             print(f"Episode {(episode + 1): >{digits}}/{num_episodes:0{digits}}:\t"
                   f"Averaged evaluation return {evaluation_returns[evaluation_step]:0.3}")
+    plt.plot(episode_evaluations, evaluation_returns)
     return agent, returns, evaluation_returns
 
 
@@ -78,4 +84,18 @@ if __name__ == '__main__':
         env = gym.make('FrozenLake-v1')
     # TODO: complete.
 
+    plt.figure()
+    plt.xlabel("Number of episodes")
+    plt.ylabel("Averaged evaluation return")
+    random.seed(56)
     train(env, 0.99, 30000, 1000, 32, 0.01, 1.0, 0.05, 0.99)
+    random.seed(98)
+    train(env, 0.99, 30000, 1000, 32, 0.01, 1.0, 0.05, 0.99)
+    random.seed(126)
+    train(env, 0.99, 30000, 1000, 32, 0.01, 1.0, 0.05, 0.99)
+    random.seed(541)
+    train(env, 0.99, 30000, 1000, 32, 0.01, 1.0, 0.05, 0.99)
+    random.seed(352)
+    train(env, 0.99, 30000, 1000, 32, 0.01, 1.0, 0.05, 0.99)
+    plt.show()
+

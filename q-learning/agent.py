@@ -72,7 +72,6 @@ class QLearnerAgent:
         if (not training):
             return self.greedy_action(observation)
         elif(random.uniform(0,1) < self.epsilon):
-            self.epsilon = self.epsilon*self.epsilon_decay
             return random.randint(0, self.num_actions-1) ;" chooses a random action "
         else: return self.greedy_action(observation)
 
@@ -88,6 +87,10 @@ class QLearnerAgent:
         """
         # TODO: complete.
 
-        self.q_table[obs, act] += self.learning_rate * (rew + self.gamma * self.q_table.argmax(axis=1)[next_obs] - self.q_table[obs, act])
-        done
+        self.q_table[obs, act] += self.learning_rate * (rew + (1-done) * self.gamma * self.q_table.max(axis=1)[next_obs] - self.q_table[obs, act])
+        if (done):
+            if (self.epsilon > self.epsilon_min):
+                self.epsilon = self.epsilon*self.epsilon_decay
+            if (self.epsilon < self.epsilon_min):
+                self.epsilon = self.epsilon_min
 
