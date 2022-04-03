@@ -72,5 +72,7 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    raise NotImplementedError
+    train(env, 0.99, 1000, 50, 32, 0.01, 1.0, 0.05, 0.99)
+
+    
 

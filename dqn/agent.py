@@ -4,6 +4,7 @@ from numpy import ndarray
 import numpy as np
 from model import QModel
 import torch
+import torch.nn as nn
 
 class DQNAgent:
     """
@@ -45,7 +46,7 @@ class DQNAgent:
         :param observation: The observation.
         :return: The action.
         """
-        return NotImplementedError
+        return torch.argmax(self.nn(observation)).item()
 
     def act(self, observation, training: bool = True) -> int:
         """
@@ -56,7 +57,11 @@ class DQNAgent:
         should act greedily.
         :return: The action.
         """
-        raise NotImplementedError
+        if (not training):
+            return self.greedy_action(observation)
+        elif(random.uniform(0,1) < self.epsilon):
+            return random.randint(0, self.num_actions-1) ;" chooses a random action "
+        else: return self.greedy_action(observation)
 
     def learn(self, obs, act, rew, done, next_obs) -> None:
         """
@@ -69,11 +74,20 @@ class DQNAgent:
         :param next_obs: The next observation.
         """
         # Compute the loss !
-        loss = None
+        with torch.no_grad():
+            target = rew + self.gamma * (1-done) * max(self.nn(next_obs))
+        prediction = self.nn(obs)[act]
+        lossfunction = nn.MSELoss()
+        loss = lossfunction(prediction, target)
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        raise NotImplementedError
+
+        if (done):
+            if (self.epsilon > self.epsilon_min):
+                self.epsilon = self.epsilon*self.epsilon_decay
+            if (self.epsilon < self.epsilon_min):
+                self.epsilon = self.epsilon_min
 
 
