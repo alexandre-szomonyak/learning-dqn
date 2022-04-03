@@ -2,9 +2,12 @@ import random
 from typing import Optional
 from numpy import ndarray
 import numpy as np
+from dqn.replay_buffer import ReplayBuffer
 from model import QModel
 import torch
 import torch.nn as nn
+import copy
+import gym
 
 class DQNAgent:
     """
@@ -18,7 +21,10 @@ class DQNAgent:
                  gamma: float,
                  epsilon_max: Optional[float] = None,
                  epsilon_min: Optional[float] = None,
-                 epsilon_decay: Optional[float] = None):
+                 epsilon_decay: Optional[float] = None,
+                 replay_size: int = None,
+                 state_shape: tuple = None,
+                 sample_size: int = None):
         """
         :param num_states: Number of states.
         :param num_actions: Number of actions.
@@ -33,11 +39,14 @@ class DQNAgent:
         self.learning_rate = learning_rate
         self.gamma = gamma
         self.nn = QModel(obs_dim, num_actions)
+        self.target_nn = copy.copy(self.nn)
         self.epsilon_decay = epsilon_decay
         self.epsilon_min = epsilon_min
         self.epsilon_max = epsilon_max
         self.epsilon = epsilon_max
         self.optimizer = torch.optim.Adam(self.nn.parameters(), lr=self.learning_rate)
+        self.buffer = ReplayBuffer(replay_size, state_shape)
+        self.sample_size = sample_size
 
     def greedy_action(self, observation) -> int:
         """
@@ -74,8 +83,10 @@ class DQNAgent:
         :param next_obs: The next observation.
         """
         # Compute the loss !
+        self.buffer.add_transition(obs, act, rew,done, next_obs)
+        states, actions, rewards, dones, next_actions = self.buffer.sample(self.sample_size)
         with torch.no_grad():
-            target = rew + self.gamma * (1-done) * max(self.nn(next_obs))
+            target = rew + self.gamma * (1-done) * max(self.target_nn(next_obs))
         prediction = self.nn(obs)[act]
         lossfunction = nn.MSELoss()
         loss = lossfunction(prediction, target)

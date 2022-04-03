@@ -35,7 +35,7 @@ def run_episode(env: Env, agent: DQNAgent, training: bool, gamma) -> float:
 
 def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_evaluation_episodes: int,
           alpha: float, epsilon_max: Optional[float] = None, epsilon_min: Optional[float] = None,
-          epsilon_decay: Optional[float] = None) -> Tuple[DQNAgent, ndarray, ndarray]:
+          epsilon_decay: Optional[float] = None, replay_size: int = 10000, reset_network_every: int = 50, sample_size: int = 30) -> Tuple[DQNAgent, ndarray, ndarray]:
     """
     Training loop.
 
@@ -53,7 +53,7 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
     """
     digits = len(str(num_episodes))
     agent = DQNAgent(4, 2, alpha, gamma, epsilon_max,
-                          epsilon_min, epsilon_decay)
+                          epsilon_min, epsilon_decay, replay_size, env.observation_space, sample_size)
     evaluation_returns = np.zeros(num_episodes // evaluate_every)
     returns = np.zeros(num_episodes)
     for episode in range(num_episodes):
