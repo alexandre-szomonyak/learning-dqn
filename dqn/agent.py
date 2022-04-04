@@ -1,6 +1,7 @@
 import random
 from typing import Optional
-from numpy import ndarray
+from importlib_metadata import NullFinder
+from numpy import ndarray, size
 import numpy as np
 from dqn.replay_buffer import ReplayBuffer
 from model import QModel
@@ -84,12 +85,22 @@ class DQNAgent:
         """
         # Compute the loss !
         self.buffer.add_transition(obs, act, rew,done, next_obs)
-        states, actions, rewards, dones, next_actions = self.buffer.sample(self.sample_size)
-        with torch.no_grad():
-            target = rew + self.gamma * (1-done) * max(self.target_nn(next_obs))
-        prediction = self.nn(obs)[act]
+        states, actions, rewards, dones, next_states = self.buffer.sample(self.sample_size)
+        q_values = np.empty(actions.size)
+        for index in range(q_values.size):
+            curr_obs = states[index]
+            curr_act = actions[index]
+            q_values[index] = self.nn(curr_obs)[curr_act]
+        target_values = np.empty(actions.size)
+        for transition in range(actions.size):
+            curr_reward = rewards[transition]
+            next_state = next_states[transition]
+            with torch.no_grad():
+                target_values[transition] = curr_reward + self.gamma * (1-done) * max(self.target_nn(next_state))
         lossfunction = nn.MSELoss()
-        loss = lossfunction(prediction, target)
+        q_values = torch.Tensor(q_values)
+        target_values = torch.Tensor(target_values)
+        loss = lossfunction(q_values, target_values)
 
         self.optimizer.zero_grad()
         loss.backward()
