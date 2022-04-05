@@ -55,7 +55,7 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
     """
     digits = len(str(num_episodes))
     agent = DQNAgent(4, 2, alpha, gamma, epsilon_max,
-                          epsilon_min, epsilon_decay, replay_size, env.observation_space.shape, sample_size)
+                          epsilon_min, epsilon_decay, replay_size, env.observation_space.shape, sample_size, reset_network_every)
     evaluation_returns = np.zeros(num_episodes // evaluate_every)
     returns = np.zeros(num_episodes)
     for episode in range(num_episodes):
@@ -74,7 +74,7 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
-    train(env, 0.99, 1000, 50, 32, 0.01, 1.0, 0.05, 0.99, 10000, 1000, 30)
+    train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.99, 10000, 1000, 30)
 
     
 

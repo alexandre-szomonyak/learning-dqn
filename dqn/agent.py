@@ -25,7 +25,8 @@ class DQNAgent:
                  epsilon_decay: Optional[float] = None,
                  replay_size: int = None,
                  state_shape: tuple = None,
-                 sample_size: int = None):
+                 sample_size: int = None,
+                 reset_network_every: int = None):
         """
         :param num_states: Number of states.
         :param num_actions: Number of actions.
@@ -48,6 +49,8 @@ class DQNAgent:
         self.optimizer = torch.optim.Adam(self.nn.parameters(), lr=self.learning_rate)
         self.buffer = ReplayBuffer(replay_size, state_shape)
         self.sample_size = sample_size
+        self.reset_network_every = reset_network_every
+        self.reset_network_counter = 0
 
     def greedy_action(self, observation) -> int:
         """
@@ -83,7 +86,6 @@ class DQNAgent:
         :param done: Done flag.
         :param next_obs: The next observation.
         """
-        # Compute the loss !
         self.buffer.add_transition(obs, act, rew,done, next_obs)
         states, actions, rewards, dones, next_states = self.buffer.sample(self.sample_size)
         q_values = np.empty(actions.size)
@@ -91,20 +93,27 @@ class DQNAgent:
             curr_obs = states[index]
             curr_act = actions[index]
             q_values[index] = self.nn(curr_obs)[curr_act]
+        q_values = torch.Tensor(q_values)
+        q_values.requires_grad=True
         target_values = np.empty(actions.size)
-        for transition in range(actions.size):
-            curr_reward = rewards[transition]
-            next_state = next_states[transition]
-            with torch.no_grad():
+        with torch.no_grad():
+            for transition in range(actions.size):
+                curr_reward = rewards[transition]
+                next_state = next_states[transition]
                 target_values[transition] = curr_reward + self.gamma * (1-done) * max(self.target_nn(next_state))
         lossfunction = nn.MSELoss()
-        q_values = torch.Tensor(q_values)
         target_values = torch.Tensor(target_values)
+        q_values.retain_grad()
         loss = lossfunction(q_values, target_values)
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+        self.reset_network_counter += 1
+        if (self.reset_network_counter == self.reset_network_every):
+            self.reset_network_counter = 0
+            self.target_nn.load_state_dict(self.nn.state_dict())
 
         if (done):
             if (self.epsilon > self.epsilon_min):
