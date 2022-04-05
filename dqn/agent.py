@@ -86,31 +86,37 @@ class DQNAgent:
         :param done: Done flag.
         :param next_obs: The next observation.
         """
-        self.buffer.add_transition(obs, act, rew,done, next_obs)
-        states, actions, rewards, dones, next_states = self.buffer.sample(self.sample_size)
-        q_values = np.empty(actions.size)
+        sample_size = self.sample_size
+        if (self.buffer.i < self.sample_size): # if the amount of transitions in the buffer is smaller than the sample_size then the sample_size must be equal to the amount of transitions
+            sample_size = self.buffer.i
+        self.buffer.add_transition(obs, act, rew,done, next_obs)                        # add the new transition to the buffer
+        states, actions, rewards, dones, next_states = self.buffer.sample(sample_size)  # get the values of the sampled transitions
+
+        q_values = np.empty(sample_size)
         for index in range(q_values.size):
             curr_obs = states[index]
             curr_act = actions[index]
-            q_values[index] = self.nn(curr_obs)[curr_act]
+            q_values[index] = self.nn(curr_obs)[curr_act]                               # put all the q-values of the sampled transitions in an array
         q_values = torch.Tensor(q_values)
         q_values.requires_grad=True
+        q_values.retain_grad()
+
         target_values = np.empty(actions.size)
         with torch.no_grad():
             for transition in range(actions.size):
                 curr_reward = rewards[transition]
                 next_state = next_states[transition]
-                target_values[transition] = curr_reward + self.gamma * (1-done) * max(self.target_nn(next_state))
-        lossfunction = nn.MSELoss()
+                target_values[transition] = curr_reward + self.gamma * (1-done) * max(self.target_nn(next_state)) # generate the target q-values for the sampled transitions
         target_values = torch.Tensor(target_values)
-        q_values.retain_grad()
+        
+        lossfunction = nn.MSELoss()
         loss = lossfunction(q_values, target_values)
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        self.reset_network_counter += 1
+        self.reset_network_counter += 1                                  # update the target-network to the current network every 'reset_network_every' often
         if (self.reset_network_counter == self.reset_network_every):
             self.reset_network_counter = 0
             self.target_nn.load_state_dict(self.nn.state_dict())
