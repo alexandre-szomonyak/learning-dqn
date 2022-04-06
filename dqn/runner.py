@@ -108,8 +108,7 @@ if __name__ == '__main__':
     plt.xlabel("Number of episodes")
     plt.ylabel("Averaged evaluation return")
     random.seed(56)
-    train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.999, 10000, 1000, 30)
-    """"
+    train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.99, 10000, 1000, 30)
     random.seed(98)
     train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.999, 10000, 1000, 30)
     random.seed(126)
@@ -120,7 +119,7 @@ if __name__ == '__main__':
     train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.999, 10000, 1000, 30)
     show_variation_from_iterations(return_from_all_iterations)
     plt.show()
-    """
+    
 
     
 
