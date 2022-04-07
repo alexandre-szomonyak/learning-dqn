@@ -41,7 +41,7 @@ evaluation_x_values = []
 
 def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_evaluation_episodes: int,
           alpha: float, epsilon_max: Optional[float] = None, epsilon_min: Optional[float] = None,
-          epsilon_decay: Optional[float] = None, replay_size: int = 10000, reset_network_every: int = 50, sample_size: int = 30) -> Tuple[DQNAgent, ndarray, ndarray]:
+          epsilon_decay: Optional[float] = None, replay_size: int = 10000, reset_network_every: int = 1000, sample_size: int = 100) -> Tuple[DQNAgent, ndarray, ndarray]:
     """
     Training loop.
 
@@ -107,8 +107,9 @@ if __name__ == '__main__':
     plt.figure()
     plt.xlabel("Number of episodes")
     plt.ylabel("Averaged evaluation return")
-    random.seed(56)
+    random.seed(74)
     train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.99, 10000, 1000, 30)
+    
     random.seed(98)
     train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.999, 10000, 1000, 30)
     random.seed(126)
@@ -118,6 +119,7 @@ if __name__ == '__main__':
     random.seed(352)
     train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.999, 10000, 1000, 30)
     show_variation_from_iterations(return_from_all_iterations)
+    
     plt.show()
     
 
