@@ -114,11 +114,13 @@ if __name__ == '__main__':
     plt.figure()
     plt.xlabel("Number of episodes")
     plt.ylabel("Averaged evaluation return")
-    train(env, 0.99, 1000, 50, 32, 0.005, 1.0, 0.05, 0.99, 100000, 10000, 64)
-    train(env, 0.99, 1000, 50, 32, 0.005, 1.0, 0.05, 0.99, 100000, 10000, 64)
-    train(env, 0.99, 1000, 50, 32, 0.005, 1.0, 0.05, 0.99, 100000, 10000, 64)
-    #train(env, 0.99, 500, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
-    #train(env, 0.99, 500, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
+    plt.ylim(0, 100)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
+
     
     plt.plot(evaluation_x_values, np.mean(return_from_all_iterations, axis=0))
     #show_variation_from_iterations(return_from_all_iterations)

@@ -97,10 +97,10 @@ class DQNAgent:
             next_states = torch.tensor(next_states)
             q_values = self.nn(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
             with torch.no_grad():
-                targets = self.target_nn(next_states).max(1)[0]
+                targets = self.target_nn(next_states).gather(1, self.nn(next_states).max(1)[1].unsqueeze(-1)).squeeze(-1)
                 targets[dones] = 0.0
                 target_q_values = rewards + self.gamma * targets
-        
+            
             lossfunction = nn.MSELoss()
             loss = lossfunction(q_values, target_q_values)
 
