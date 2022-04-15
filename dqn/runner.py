@@ -1,6 +1,7 @@
 from cProfile import label
 from hashlib import new
 from lib2to3.pgen2.token import NEWLINE
+from statistics import mean
 from typing import Tuple, Optional
 import matplotlib.pyplot as plt
 import gym
@@ -67,6 +68,10 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
                           epsilon_min, epsilon_decay, replay_size, env.observation_space.shape, sample_size, reset_network_every)
     evaluation_returns = np.zeros(num_episodes // evaluate_every)
     episode_evaluations = np.zeros(num_episodes // evaluate_every)
+    for x_value in range(episode_evaluations.size):
+        episode_evaluations[x_value] = evaluate_every*x_value
+    global evaluation_x_values 
+    evaluation_x_values= episode_evaluations
     returns = np.zeros(num_episodes)
     for episode in range(num_episodes):
         returns[episode] = run_episode(env, agent, True, gamma)
@@ -77,15 +82,11 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
             for eval_episode in range(num_evaluation_episodes):
                 cum_rewards_eval[eval_episode] = run_episode(env, agent, False, gamma)
             evaluation_returns[evaluation_step] = np.mean(cum_rewards_eval)
-            episode_evaluations[evaluation_step] = episode + 1
             print(f"Episode {(episode + 1): >{digits}}/{num_episodes:0{digits}}:\t"
                   f"Averaged evaluation return {evaluation_returns[evaluation_step]:0.3}")
-    global evaluation_x_values 
-    evaluation_x_values= episode_evaluations
-    my_label = "learning-rate" + str(alpha) + str(sample_size)
-    plt.plot(episode_evaluations, evaluation_returns, label=my_label)
     return_from_all_iterations.append(evaluation_returns)
     return agent, returns, evaluation_returns
+
 
 def show_variation_from_iterations(iteration_returns):
     number_of_evaluations = len(iteration_returns[0])
@@ -113,12 +114,13 @@ if __name__ == '__main__':
     plt.figure()
     plt.xlabel("Number of episodes")
     plt.ylabel("Averaged evaluation return")
-    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
-    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
-    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
-    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
-    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
+    train(env, 0.99, 1000, 50, 32, 0.005, 1.0, 0.05, 0.99, 100000, 10000, 64)
+    train(env, 0.99, 1000, 50, 32, 0.005, 1.0, 0.05, 0.99, 100000, 10000, 64)
+    train(env, 0.99, 1000, 50, 32, 0.005, 1.0, 0.05, 0.99, 100000, 10000, 64)
+    #train(env, 0.99, 500, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
+    #train(env, 0.99, 500, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
     
+    plt.plot(evaluation_x_values, np.mean(return_from_all_iterations, axis=0))
     #show_variation_from_iterations(return_from_all_iterations)
     plt.legend()
     plt.show()

@@ -41,16 +41,16 @@ class DQNAgent:
         self.learning_rate = learning_rate
         self.gamma = gamma
         self.nn = QModel(obs_dim, num_actions)
-        #self.target_nn = copy.copy(self.nn)
+        self.target_nn = copy.copy(self.nn)
         self.epsilon_decay = epsilon_decay
         self.epsilon_min = epsilon_min
         self.epsilon_max = epsilon_max
         self.epsilon = epsilon_max
         self.optimizer = torch.optim.Adam(self.nn.parameters(), lr=self.learning_rate)
-        #self.buffer = ReplayBuffer(replay_size, state_shape)
-        #self.sample_size = sample_size
-        #self.reset_network_every = reset_network_every
-        #self.reset_network_counter = 0
+        self.buffer = ReplayBuffer(replay_size, state_shape)
+        self.sample_size = sample_size
+        self.reset_network_every = reset_network_every
+        self.reset_network_counter = 0
 
     def greedy_action(self, observation) -> int:
         """
@@ -86,7 +86,7 @@ class DQNAgent:
         :param done: Done flag.
         :param next_obs: The next observation.
         """
-        """
+        
         self.buffer.add_transition(obs, act, rew,done, next_obs)                        # add the new transition to the buffer
         if (self.sample_size < self.buffer.i):                                          # if the amount of transitions in the buffer is smaller than the sample_size, do not sample
             states, actions, rewards, dones, next_states = self.buffer.sample(self.sample_size)  # get the values of the sampled transitions
@@ -101,22 +101,19 @@ class DQNAgent:
                 targets[dones] = 0.0
                 target_q_values = rewards + self.gamma * targets
         
-            
+            lossfunction = nn.MSELoss()
+            loss = lossfunction(q_values, target_q_values)
+
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
             
             self.reset_network_counter += 1                                  # update the target-network to the current network every 'reset_network_every' often
             if (self.reset_network_counter == self.reset_network_every):
                 self.reset_network_counter = 0
                 self.target_nn.load_state_dict(self.nn.state_dict())
-        """
-        with torch.no_grad():
-            target = rew + self.gamma * (1-done) * max(self.nn(next_obs))
-        prediction = self.nn(obs)[act]
-        lossfunction = nn.MSELoss()
-        loss = lossfunction(prediction, target)
-
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+        
+            
 
     def update_epsilon(self):
         if (self.epsilon > self.epsilon_min):
