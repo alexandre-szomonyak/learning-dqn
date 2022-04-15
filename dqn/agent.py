@@ -118,9 +118,7 @@ class DQNAgent:
         loss.backward()
         self.optimizer.step()
 
-        if (done):
-            if (self.epsilon > self.epsilon_min):
-                self.epsilon = self.epsilon*self.epsilon_decay
-            if (self.epsilon < self.epsilon_min):
-                self.epsilon = self.epsilon_min
+    def update_epsilon(self):
+        if (self.epsilon > self.epsilon_min):
+            self.epsilon = max(self.epsilon*self.epsilon_decay, self.epsilon_min)
 

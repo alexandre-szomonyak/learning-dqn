@@ -1,3 +1,4 @@
+from cProfile import label
 from hashlib import new
 from lib2to3.pgen2.token import NEWLINE
 from typing import Tuple, Optional
@@ -7,10 +8,13 @@ import numpy as np
 from gym import Env
 from numpy import ndarray
 import math
-import random
 
 from agent import DQNAgent
+""" env.render to render the example
+ 1) flow: tutorial
+ 2)  
 
+"""
 
 def run_episode(env: Env, agent: DQNAgent, training: bool, gamma) -> float:
     """
@@ -34,6 +38,7 @@ def run_episode(env: Env, agent: DQNAgent, training: bool, gamma) -> float:
         obs = new_obs
         cum_reward += gamma ** t * reward
         t += 1
+    agent.update_epsilon()
     return cum_reward
 
 return_from_all_iterations = []
@@ -77,7 +82,8 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
                   f"Averaged evaluation return {evaluation_returns[evaluation_step]:0.3}")
     global evaluation_x_values 
     evaluation_x_values= episode_evaluations
-    plt.plot(episode_evaluations, evaluation_returns)
+    my_label = "learning-rate" + str(alpha) + str(sample_size)
+    plt.plot(episode_evaluations, evaluation_returns, label=my_label)
     return_from_all_iterations.append(evaluation_returns)
     return agent, returns, evaluation_returns
 
@@ -107,19 +113,14 @@ if __name__ == '__main__':
     plt.figure()
     plt.xlabel("Number of episodes")
     plt.ylabel("Averaged evaluation return")
-    random.seed(74)
-    train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.99, 10000, 1000, 30)
+    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
+    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
+    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
+    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
+    train(env, 0.99, 3000, 50, 32, 0.005, 1.0, 0.05, 0.999, 10000, 1000, 64)
     
-    random.seed(98)
-    train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.999, 10000, 1000, 30)
-    random.seed(126)
-    train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.999, 10000, 1000, 30)
-    random.seed(541)
-    train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.999, 10000, 1000, 30)
-    random.seed(352)
-    train(env, 0.99, 3000, 50, 32, 0.01, 1.0, 0.05, 0.999, 10000, 1000, 30)
-    show_variation_from_iterations(return_from_all_iterations)
-    
+    #show_variation_from_iterations(return_from_all_iterations)
+    plt.legend()
     plt.show()
     
 
