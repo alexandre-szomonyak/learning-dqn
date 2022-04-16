@@ -89,24 +89,11 @@ def train(env: Env, gamma: float, num_episodes: int, evaluate_every: int, num_ev
 
 
 def show_variation_from_iterations(iteration_returns):
-    number_of_evaluations = len(iteration_returns[0])
-    lower_bound = np.zeros(number_of_evaluations)
-    upper_bound = np.zeros(number_of_evaluations)
-    mean = np.zeros(number_of_evaluations)
-    std_dev = np.zeros(number_of_evaluations)
-    for curr in range(number_of_evaluations):
-        sum_of_returns = 0
-        for iteration in range(len(iteration_returns)):
-            sum_of_returns += iteration_returns[iteration][curr]
-        mean[curr] = sum_of_returns/len(iteration_returns)
-
-        sum_deviations = 0
-        for iteration in range(len(iteration_returns)):
-            sum_deviations += (iteration_returns[iteration][curr] - mean[curr]) ** 2
-        std_dev[curr] = math.sqrt(sum_deviations / number_of_evaluations)
-        lower_bound[curr] = mean[curr] - std_dev[curr]
-        upper_bound[curr] = mean[curr] + std_dev[curr]
-    plt.fill_between(evaluation_x_values, lower_bound, upper_bound, color='yellow', alpha=0.8)
+    std_dev = np.std(iteration_returns, axis=0)
+    mean_of_returns = np.mean(iteration_returns, axis=0)
+    lower_bound = mean_of_returns - std_dev
+    upper_bound = mean_of_returns + std_dev
+    plt.fill_between(evaluation_x_values, lower_bound, upper_bound, color='cyan', alpha=0.8)
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
@@ -115,15 +102,14 @@ if __name__ == '__main__':
     plt.xlabel("Number of episodes")
     plt.ylabel("Averaged evaluation return")
     plt.ylim(0, 100)
-    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
-    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
-    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
-    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
-    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 200000, 10000, 128)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 500000, 20000, 128)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 500000, 20000, 128)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 500000, 20000, 128)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 500000, 20000, 128)
+    train(env, 0.99, 2000, 50, 32, 0.001, 1.0, 0.05, 0.99, 500000, 20000, 128)
 
-    
     plt.plot(evaluation_x_values, np.mean(return_from_all_iterations, axis=0))
-    #show_variation_from_iterations(return_from_all_iterations)
+    show_variation_from_iterations(return_from_all_iterations)
     plt.legend()
     plt.show()
     
